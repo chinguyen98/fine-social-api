@@ -1,5 +1,5 @@
 enum EmailTemplateEnum {
-  REGISTER_VERTIFICATION = 'register-vetification',
+  REGISTER_VERTIFICATION = 'register-vertification',
 }
 
 export default EmailTemplateEnum;
