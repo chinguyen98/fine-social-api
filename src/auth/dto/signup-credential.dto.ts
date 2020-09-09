@@ -1,4 +1,4 @@
-import { IsString, IsEmail, Matches, MinLength, IsIn, IsDate } from 'class-validator';
+import { IsString, IsEmail, Matches, MinLength, IsIn, IsDate, IsNumber, IsNumberString } from 'class-validator';
 import Gender from 'src/shared/enum/gender.enum';
 
 class SignupCredentialsDto {
@@ -20,14 +20,14 @@ class SignupCredentialsDto {
   @IsIn([Gender.MALE, Gender.FEMALE], { message: 'Invalid gender!' })
   gender: string;
 
-  @IsString()
-  date: number
+  @IsNumberString()
+  day: string
 
-  @IsString()
-  month: number
+  @IsNumberString()
+  month: string
 
-  @IsString()
-  year: number
+  @IsNumberString()
+  year: string
 }
 
 export default SignupCredentialsDto;

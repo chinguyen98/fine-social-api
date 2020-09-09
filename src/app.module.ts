@@ -28,7 +28,7 @@ import { MailModule } from './mail/mail.module';
       },
       preview: false,
       template: {
-        dir: process.cwd() + '/src/templates/',
+        dir: process.cwd() + '/src/mail/templates/',
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

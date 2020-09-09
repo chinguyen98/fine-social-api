@@ -31,12 +31,17 @@ export class User {
   @prop({
     required: true,
   })
-  readonly created_at: string;
+  readonly created_at: Date;
 
   @prop({
     required: true,
   })
-  readonly updated_at: string;
+  readonly updated_at: Date;
+  
+  @prop({
+    required: true,
+  })
+  readonly date_of_birth: Date;
 
   @prop({
     required: true,
@@ -54,11 +59,6 @@ export class User {
 
   @prop()
   readonly vertification_code?: string;
-
-  @prop({
-    required: true,
-  })
-  readonly date_of_birth?: string;
 
   @prop()
   readonly nickname?: string;

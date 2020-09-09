@@ -1,9 +1,10 @@
-import { Injectable, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotAcceptableException } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { User } from './user.schema';
 import { ReturnModelType } from '@typegoose/typegoose';
 import * as bcrypt from 'bcrypt';
 import * as cryptoRandomString from 'crypto-random-string';
+import * as moment from 'moment';
 
 import { hashPassword } from './user.helper';
 import SignupCredentialsDto from './dto/signup-credential.dto';
@@ -21,8 +22,14 @@ export class AuthService {
   ) { }
 
   async signUp(signupCredentialDto: SignupCredentialsDto): Promise<ISuccessResponse> {
-    const { email, password, firstname, lastname, gender, date, month, year } = signupCredentialDto;
-    const date_of_birth = new Date(year, month - 1, date);
+    const { email, password, firstname, lastname, gender, day, month, year } = signupCredentialDto;
+    const isValidDate = moment(`${year} ${month} ${day}`, 'YYYY/MM/DD').isValid();
+
+    if (!isValidDate) {
+      throw new NotAcceptableException('Invalid date format!');
+    }
+
+    const date_of_birth = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     const vertification_code = cryptoRandomString({ length: 8 });
 
     const salt = await bcrypt.genSalt();
