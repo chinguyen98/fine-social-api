@@ -1,27 +1,29 @@
 import { Injectable, ConflictException, InternalServerErrorException, NotAcceptableException } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
-import { User } from './user.schema';
 import { ReturnModelType } from '@typegoose/typegoose';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as cryptoRandomString from 'crypto-random-string';
 import * as moment from 'moment';
 
 import { hashPassword } from './user.helper';
-import SignupCredentialsDto from './dto/signup-credential.dto';
+import { User } from './user.schema';
 import { MailService } from 'src/mail/mail.service';
-import EmailTemplateEnum from 'src/shared/enum/email-template.enum';
 import { IRegisterVertificationMailContext } from 'src/mail/mail-context.interface';
+import SignupCredentialsDto from './dto/signup-credential.dto';
+import EmailTemplateEnum from 'src/shared/enum/email-template.enum';
 import ErrorCode from 'src/shared/enum/error-code.enum';
-import ISuccessResponse from 'src/shared/interface/success-response.interface';
+import IJwtPayLoad from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User) private readonly userModel: ReturnModelType<typeof User>,
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
+    private readonly jwtService: JwtService,
   ) { }
 
-  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<ISuccessResponse> {
+  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<{ accessToken: string }> {
     const { email, password, firstname, lastname, gender, day, month, year } = signupCredentialDto;
     const isValidDate = moment(`${year} ${month} ${day}`, 'YYYY/MM/DD').isValid();
 
@@ -52,8 +54,10 @@ export class AuthService {
       const context: IRegisterVertificationMailContext = { username: firstname, code: vertification_code }
       this.mailService.sendMailToGuest(EmailTemplateEnum.REGISTER_VERTIFICATION, email, 'Verify your account on Fine Social', context);
 
-      const response: ISuccessResponse = { statusCode: 200, message: 'Sign up successfully!' }
-      return response;
+      const jwtPayload: IJwtPayLoad = { firstname, lastname, isVerify: false };
+      const accessToken = this.jwtService.sign(jwtPayload);
+
+      return { accessToken };
     } catch (error) {
       if (error.code === ErrorCode.CONFLICT_UNIQUE) {
         throw new ConflictException('Email is already in use!');
