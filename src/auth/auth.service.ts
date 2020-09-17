@@ -60,7 +60,7 @@ export class AuthService {
       return { accessToken };
     } catch (error) {
       if (error.code === ErrorCode.CONFLICT_UNIQUE) {
-        throw new ConflictException('Email is already in use!');
+        throw new ConflictException('Email đã có người sử dụng!');
       } else {
         throw new InternalServerErrorException();
       }
