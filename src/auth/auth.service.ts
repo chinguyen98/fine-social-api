@@ -14,6 +14,7 @@ import SignupCredentialsDto from './dto/signup-credential.dto';
 import EmailTemplateEnum from 'src/shared/enum/email-template.enum';
 import ErrorCode from 'src/shared/enum/error-code.enum';
 import IJwtPayLoad from './jwt-payload.interface';
+import IDualToken from './dual-token.interface';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) { }
 
-  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<{ accessToken: string }> {
+  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<IDualToken> {
     const { email, password, firstname, lastname, gender, day, month, year } = signupCredentialDto;
     const isValidDate = moment(`${year} ${month} ${day}`, 'YYYY/MM/DD').isValid();
 
@@ -55,9 +56,16 @@ export class AuthService {
       this.mailService.sendMailToGuest(EmailTemplateEnum.REGISTER_VERTIFICATION, email, 'Verify your account on Fine Social', context);
 
       const jwtPayload: IJwtPayLoad = { firstname, lastname, isVerify: false };
-      const accessToken = this.jwtService.sign(jwtPayload);
+      const accessToken = this.jwtService.sign(jwtPayload, {
+        secret: process.env.ACCESS_TOKEN_SECRET,
+        expiresIn: process.env.ACCESS_TOKEN_SECRET_EXPIRE,
+      });
+      const refreshToken = this.jwtService.sign(jwtPayload, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+        expiresIn: process.env.REFRESH_TOKEN_SECRET_EXPIRE,
+      });
 
-      return { accessToken };
+      return { accessToken, refreshToken };
     } catch (error) {
       if (error.code === ErrorCode.CONFLICT_UNIQUE) {
         throw new ConflictException('Email đã có người sử dụng!');

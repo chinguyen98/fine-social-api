@@ -17,12 +17,7 @@ import { MailService } from 'src/mail/mail.service';
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: {
-        expiresIn: 3600,
-      }
-    }),
+    JwtModule.register({}),
     TypegooseModule.forFeature([User]),
     MailService,
   ],
