@@ -37,7 +37,7 @@ export class User {
     required: true,
   })
   readonly updated_at: Date;
-  
+
   @prop({
     required: true,
   })
@@ -68,4 +68,7 @@ export class User {
 
   @prop()
   readonly avatar?: string;
+
+  @prop()
+  readonly refresh_token?: string;
 }

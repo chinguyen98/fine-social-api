@@ -14,7 +14,6 @@ import SignupCredentialsDto from './dto/signup-credential.dto';
 import EmailTemplateEnum from 'src/shared/enum/email-template.enum';
 import ErrorCode from 'src/shared/enum/error-code.enum';
 import IJwtPayLoad from './jwt-payload.interface';
-import IDualToken from './dual-token.interface';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) { }
 
-  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<IDualToken> {
+  async signUp(signupCredentialDto: SignupCredentialsDto): Promise<{ accessToken: string }> {
     const { email, password, firstname, lastname, gender, day, month, year } = signupCredentialDto;
     const isValidDate = moment(`${year} ${month} ${day}`, 'YYYY/MM/DD').isValid();
 
@@ -46,7 +45,7 @@ export class AuthService {
       date_of_birth,
       password_salt: salt,
       password: await hashPassword(password, salt),
-      vertification_code
+      vertification_code,
     });
 
     try {
@@ -56,16 +55,12 @@ export class AuthService {
       this.mailService.sendMailToGuest(EmailTemplateEnum.REGISTER_VERTIFICATION, email, 'Verify your account on Fine Social', context);
 
       const jwtPayload: IJwtPayLoad = { firstname, lastname, isVerify: false };
-      const accessToken = this.jwtService.sign(jwtPayload, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: process.env.ACCESS_TOKEN_SECRET_EXPIRE,
-      });
-      const refreshToken = this.jwtService.sign(jwtPayload, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: process.env.REFRESH_TOKEN_SECRET_EXPIRE,
-      });
+      const accessToken = this.generateAccessToken(created_user.id, jwtPayload);
+      const refreshToken = this.generateRefreshToken(created_user.id, jwtPayload);
 
-      return { accessToken, refreshToken };
+      await this.userModel.updateOne({ _id: created_user.id }, { refresh_token: refreshToken });
+
+      return { accessToken };
     } catch (error) {
       if (error.code === ErrorCode.CONFLICT_UNIQUE) {
         throw new ConflictException('Email đã có người sử dụng!');
@@ -73,5 +68,25 @@ export class AuthService {
         throw new InternalServerErrorException();
       }
     }
+  }
+
+  generateAccessToken(userId: string, payload: IJwtPayLoad): string {
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      expiresIn: process.env.ACCESS_TOKEN_SECRET_EXPIRE,
+      audience: userId,
+    });
+
+    return accessToken;
+  }
+
+  generateRefreshToken(userId: string, payload: IJwtPayLoad): string {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.REFRESH_TOKEN_SECRET,
+      expiresIn: process.env.REFRESH_TOKEN_SECRET_EXPIRE,
+      audience: userId,
+    });
+
+    return refreshToken;
   }
 }
