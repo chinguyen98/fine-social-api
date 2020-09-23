@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { TypegooseModule } from "nestjs-typegoose";
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TypegooseModule } from "nestjs-typegoose";
+
+import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { VerifyModule } from './verify/verify.module';
 
 @Module({
   imports: [
@@ -43,7 +45,8 @@ import { MailModule } from './mail/mail.module';
     }),
 
     AuthModule,
-    MailModule
+    MailModule,
+    VerifyModule
   ],
 })
 export class AppModule {
