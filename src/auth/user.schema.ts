@@ -1,7 +1,13 @@
-import { prop } from '@typegoose/typegoose';
+import { mongoose, prop } from '@typegoose/typegoose';
 import UserRole from 'src/shared/enum/user-role.enum';
 
 export class User {
+  @prop({
+    type: mongoose.Types.ObjectId,
+    default: new mongoose.Types.ObjectId(),
+  })
+  readonly _id?: mongoose.Types.ObjectId;
+
   @prop({
     required: true,
     unique: true,
