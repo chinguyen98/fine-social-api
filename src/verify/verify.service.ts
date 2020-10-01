@@ -13,9 +13,12 @@ export class VerifyService {
     private readonly authService: AuthService,
   ) { }
 
-  async verifyMailCode(mailCodeDto: MailCodeDto, user: User): Promise<{ accessToken: string }> {
+  async verifyMailCode(mailCodeDto: MailCodeDto, user: any): Promise<{ accessToken: string }> {
     const { mailCode } = mailCodeDto;
-    const { vertification_code, firstname, lastname } = user;
+    const { _id, vertification_code, firstname, lastname } = user;
+
+    console.log(user);
+    console.log(mailCode, vertification_code);
 
     if (vertification_code === null) {
       throw new ForbiddenException();
@@ -23,6 +26,7 @@ export class VerifyService {
 
     if (mailCode === vertification_code) {
       const payload: IJwtPayLoad = {
+        _id,
         firstname,
         lastname,
         isVerify: true,

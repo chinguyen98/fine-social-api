@@ -54,7 +54,7 @@ export class AuthService {
       const context: IRegisterVertificationMailContext = { username: firstname, code: vertification_code }
       this.mailService.sendMailToGuest(EmailTemplateEnum.REGISTER_VERTIFICATION, email, 'Verify your account on Fine Social', context);
 
-      const jwtPayload: IJwtPayLoad = { firstname, lastname, isVerify: false };
+      const jwtPayload: IJwtPayLoad = { _id: created_user.id, firstname, lastname, isVerify: false };
       const accessToken = this.generateAccessToken(created_user.id, jwtPayload);
       const refreshToken = this.generateRefreshToken(created_user.id, jwtPayload);
 

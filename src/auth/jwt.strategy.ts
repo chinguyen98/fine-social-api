@@ -19,8 +19,8 @@ class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(jwtPayload: IJwtPayLoad) {
-    const { firstname, lastname } = jwtPayload;
-    const user = await this.userModel.findOne({ firstname, lastname });
+    const { _id } = jwtPayload;
+    const user = await this.userModel.findOne({ _id });
 
     if (!user) {
       throw new UnauthorizedException('Sai tài khoản hoặc mật khẩu');
