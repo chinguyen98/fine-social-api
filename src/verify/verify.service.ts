@@ -17,9 +17,6 @@ export class VerifyService {
     const { mailCode } = mailCodeDto;
     const { _id, vertification_code, firstname, lastname } = user;
 
-    console.log(user);
-    console.log(mailCode, vertification_code);
-
     if (vertification_code === null) {
       throw new ForbiddenException();
     }
