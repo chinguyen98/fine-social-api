@@ -14,6 +14,7 @@ import SignupCredentialsDto from './dto/signup-credential.dto';
 import EmailTemplateEnum from 'src/shared/enum/email-template.enum';
 import ErrorCode from 'src/shared/enum/error-code.enum';
 import IJwtPayLoad from './jwt-payload.interface';
+import SignInCredentialsDto from './dto/signIn-credential.dto';
 
 @Injectable()
 export class AuthService {
@@ -68,6 +69,13 @@ export class AuthService {
         throw new InternalServerErrorException();
       }
     }
+  }
+
+  async signIn(signInCredentialDto: SignInCredentialsDto): Promise<{ accessToken }> {
+    const { email, password } = signInCredentialDto;
+    console.log(email, password);
+
+    return { accessToken: 'qweqweqw' };
   }
 
   generateAccessToken(userId: string, payload: IJwtPayLoad): string {
