@@ -1,4 +1,6 @@
 import { mongoose, prop } from '@typegoose/typegoose';
+import * as bcrypt from 'bcrypt';
+
 import UserRole from 'src/shared/enum/user-role.enum';
 
 export class User {
@@ -71,4 +73,9 @@ export class User {
 
   @prop()
   readonly refresh_token?: string;
+
+  async validatePassword(password: string): Promise<boolean> {
+    const hash = await bcrypt.hash(password, this.password_salt);
+    return hash === this.password;
+  }
 }

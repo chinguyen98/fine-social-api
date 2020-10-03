@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, InternalServerErrorException, NotAcceptableException } from '@nestjs/common';
+import { Injectable, ConflictException, InternalServerErrorException, NotAcceptableException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { JwtService } from '@nestjs/jwt';
@@ -73,9 +73,25 @@ export class AuthService {
 
   async signIn(signInCredentialDto: SignInCredentialsDto): Promise<{ accessToken }> {
     const { email, password } = signInCredentialDto;
-    console.log(email, password);
+    const user = await this.validateUserPassword(email, password);
 
-    return { accessToken: 'qweqweqw' };
+    if (!user) {
+      throw new UnauthorizedException('Sai tên tài khoản hoặc mật khẩu!')
+    }
+
+    const jwtPayload: IJwtPayLoad = {
+      _id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      isVerify: user.vertification_code === null,
+    }
+
+    const accessToken = this.generateAccessToken(user.id, jwtPayload);
+    const refreshToken = this.generateRefreshToken(user.id, jwtPayload);
+
+    await this.userModel.updateOne({ _id: user.id }, { refresh_token: refreshToken });
+
+    return { accessToken };
   }
 
   generateAccessToken(userId: string, payload: IJwtPayLoad): string {
@@ -96,5 +112,13 @@ export class AuthService {
     });
 
     return refreshToken;
+  }
+
+  async validateUserPassword(email: string, password: string): Promise<any> {
+    const user = await this.userModel.findOne({ email });
+    if (user && await user.validatePassword(password)) {
+      return user;
+    }
+    return null;
   }
 }
